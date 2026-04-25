@@ -113,6 +113,7 @@ export default function DashboardLayout({ breadcrumb }) {
                 <div className="dashboard-layout__avatar-sm">
                   {user?.pfpic ? <img src={`${ASSET_URL}/${user.pfpic}`} alt="Profile" /> : initials}
                 </div>
+                <span className="dashboard-layout__profile-name">{user?.first_name}</span>
                 <FaChevronDown className={`dashboard-layout__chevron ${showProfileMenu ? 'rotate' : ''}`} />
               </button>
 

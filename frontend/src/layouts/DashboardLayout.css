@@ -169,6 +169,19 @@
   object-fit: cover;
 }
 
+.dashboard-layout__profile-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-on-surface);
+  margin: 0 var(--space-1);
+}
+
+@media (max-width: 640px) {
+  .dashboard-layout__profile-name {
+    display: none;
+  }
+}
+
 .dashboard-layout__chevron {
   font-size: 0.75rem;
   opacity: 0.6;

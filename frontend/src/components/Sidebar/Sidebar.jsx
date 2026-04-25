@@ -13,7 +13,6 @@ import {
   FaGraduationCap,
   FaChartLine,
   FaIdCard,
-  FaSignOutAlt,
   FaBars,
   FaTimes,
   FaHistory,
@@ -36,7 +35,6 @@ const Icons = {
   progress: () => <span className="sidebar__nav-icon"><FaChartLine /></span>,
   virtualId: () => <span className="sidebar__nav-icon"><FaIdCard /></span>,
   activities: () => <span className="sidebar__nav-icon"><FaClipboardList /></span>,
-  logout: () => <span className="sidebar__nav-icon"><FaSignOutAlt /></span>,
 };
 
 const NAV_CONFIG = {
@@ -119,17 +117,12 @@ const NAV_CONFIG = {
 };
 
 export default function Sidebar({ mobileOpen, onToggleMobile }) {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const role = user?.user_type || 'intern';
   const config = NAV_CONFIG[role] || NAV_CONFIG.intern;
   const theme = config.theme;
-
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
 
   const initials = user
     ? `${(user.first_name || '')[0] || ''}${(user.last_name || '')[0] || ''}`.toUpperCase()
@@ -193,7 +186,7 @@ export default function Sidebar({ mobileOpen, onToggleMobile }) {
 
         {/* Footer */}
         <div className="sidebar__footer">
-          <div className="sidebar__user" onClick={handleLogout} title="Sign out" id="sidebar-logout">
+          <div className="sidebar__user">
             <div className="sidebar__avatar">
               {user?.pfpic ? <img src={`${ASSET_URL}/${user.pfpic}`} alt="Profile" /> : initials}
             </div>
@@ -203,7 +196,6 @@ export default function Sidebar({ mobileOpen, onToggleMobile }) {
               </div>
               <div className="sidebar__user-role">{role}</div>
             </div>
-            <Icons.logout />
           </div>
         </div>
       </aside>
