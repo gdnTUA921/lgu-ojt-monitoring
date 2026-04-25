@@ -261,6 +261,17 @@ CREATE TABLE activity_submission_files (
     FOREIGN KEY (submission_id) REFERENCES activity_submissions(submission_id) ON DELETE CASCADE
 );
 
+CREATE TABLE activity_instruction_files (
+    file_id      INT AUTO_INCREMENT PRIMARY KEY,
+    activity_id  INT NOT NULL,
+    file_path    VARCHAR(500) NOT NULL,
+    file_name    VARCHAR(255) NOT NULL,
+    file_size    INT NOT NULL,
+    mime_type    VARCHAR(100),
+    uploaded_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (activity_id) REFERENCES activities(activity_id) ON DELETE CASCADE
+);
+
 -- =========================================
 -- NOTIFICATIONS
 -- =========================================

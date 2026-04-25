@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { activitiesApi } from '../../services/api';
-import { FaEye, FaDownload, FaTimes, FaUpload } from 'react-icons/fa';
+import { FaEye, FaDownload, FaTimes, FaUpload, FaFile } from 'react-icons/fa';
 import '../../styles/manage-page.css';
 
 const MAX_BYTES = 52428800; // 50 MB
@@ -214,6 +214,33 @@ export default function InternActivities() {
               {selected.description && (
                 <div style={{ background: 'var(--color-surface-container-low)', padding: 12, borderRadius: 8, fontSize: 14, whiteSpace: 'pre-wrap' }}>
                   {selected.description}
+                </div>
+              )}
+
+              {/* Supervisor instruction files */}
+              {selected.instruction_files?.length > 0 && (
+                <div style={{ padding: '10px 14px', background: 'var(--color-surface-container-low)', borderRadius: 8, border: '1px solid var(--color-outline-variant)' }}>
+                  <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', opacity: 0.55, marginBottom: 8 }}>
+                    Instruction Files ({selected.instruction_files.length})
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {selected.instruction_files.map(f => (
+                      <div key={f.file_id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 10px', background: 'var(--color-surface-container-high)', borderRadius: 6 }}>
+                        <FaFile style={{ fontSize: 13, color: 'var(--color-primary)', flexShrink: 0 }} />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: 13, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.file_name}</div>
+                          <div style={{ fontSize: 11, opacity: 0.55 }}>{fmtSize(f.file_size)}</div>
+                        </div>
+                        <button
+                          className="btn btn--ghost btn--sm"
+                          style={{ padding: '4px 8px', height: 'auto', fontSize: 11, flexShrink: 0 }}
+                          onClick={() => handleDownloadFile(f)}
+                        >
+                          <FaDownload />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
 

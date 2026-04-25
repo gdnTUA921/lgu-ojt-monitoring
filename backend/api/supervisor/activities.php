@@ -154,12 +154,18 @@ try {
         $cnt_stmt->execute([$supervisor_id]);
         $total_interns = (int)$cnt_stmt->fetchColumn();
 
+        $if_stmt = $pdo->prepare("SELECT file_id, file_name, file_size, mime_type FROM activity_instruction_files WHERE activity_id = ? ORDER BY uploaded_at ASC");
+
         foreach ($rows as &$r) {
             $r['is_graded']        = (bool)$r['is_graded'];
             $r['is_active']        = (bool)$r['is_active'];
             $r['accept_late']      = (bool)$r['accept_late'];
             $r['submission_count'] = (int)$r['submission_count'];
-            
+
+            // Instruction files
+            $if_stmt->execute([$r['activity_id']]);
+            $r['instruction_files'] = $if_stmt->fetchAll(PDO::FETCH_ASSOC);
+
             // If specific, fetch the targeted IDs
             if ($r['target_type'] === 'specific') {
                 $t_stmt = $pdo->prepare("SELECT intern_id FROM activity_targets WHERE activity_id = ?");

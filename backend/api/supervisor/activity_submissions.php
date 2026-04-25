@@ -123,6 +123,10 @@ try {
 
         $activity['is_graded'] = (bool)$activity['is_graded'];
 
+        $if_stmt = $pdo->prepare("SELECT file_id, file_name, file_size, mime_type FROM activity_instruction_files WHERE activity_id = ? ORDER BY uploaded_at ASC");
+        $if_stmt->execute([$route_id]);
+        $activity['instruction_files'] = $if_stmt->fetchAll(PDO::FETCH_ASSOC);
+
         echo json_encode([
             "status"   => "success",
             "activity" => $activity,

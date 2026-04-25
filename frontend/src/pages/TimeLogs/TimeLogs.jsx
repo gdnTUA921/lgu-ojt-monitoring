@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { timelogsApi } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
-import { FaClock, FaEye, FaSignOutAlt } from 'react-icons/fa';
+import { FaClock, FaEye, FaSignOutAlt, FaFilePdf, FaFileCsv } from 'react-icons/fa';
 import LocationMap from '../../components/LocationMap';
+import { downloadTimelogsPDF, downloadTimelogsCSV } from '../../utils/exportTimelogs';
 import '../../styles/manage-page.css';
 import '../../pages/InternDashboard/InternDashboard.css';
 
@@ -249,10 +250,36 @@ export default function TimeLogs({ mode = 'admin' }) {
     } finally { setLoading(false); }
   };
 
+  const fetchAllLogsForExport = async () => {
+    const params = { sort, date_from: filterDate || undefined, limit: 9999 };
+    if (mode === 'intern') params.user_id = user?.user_id;
+    const data = await timelogsApi.list(params);
+    return data.timelogs || [];
+  };
+
+  const handleExportPDF = async () => {
+    const all = await fetchAllLogsForExport();
+    const subtitle = filterDate ? `Filtered from ${filterDate}` : 'All records';
+    downloadTimelogsPDF(all, { title: 'Time Logs Report', subtitle });
+  };
+
+  const handleExportCSV = async () => {
+    const all = await fetchAllLogsForExport();
+    downloadTimelogsCSV(all, `timelogs_${new Date().toISOString().slice(0, 10)}.csv`);
+  };
+
   return (
     <div className="manage-page" id="timelogs-page">
       <div className="manage-page__header">
         <h2 className="manage-page__title">Time Logs</h2>
+        <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+          <button className="btn btn--ghost btn--sm" onClick={handleExportCSV} title="Download CSV">
+            <FaFileCsv /> CSV
+          </button>
+          <button className="btn btn--primary btn--sm" onClick={handleExportPDF} title="Download PDF">
+            <FaFilePdf /> PDF
+          </button>
+        </div>
       </div>
 
       {mode === 'intern' && (

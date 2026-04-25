@@ -28,6 +28,9 @@ $request_uri = $_SERVER['REQUEST_URI'];
 $method = $_SERVER['REQUEST_METHOD'];
 $path = parse_url($request_uri, PHP_URL_PATH);
 
+// Optional secondary ID for nested routes (e.g. /activities/{id}/files/{file_id})
+$extra_id = null;
+
 // 3. Role-Based Route Definitions
 $routes = [
     // --- Authentication ---
@@ -137,6 +140,15 @@ if (preg_match('/^\/api\/admin\/interns\/(\d+)\/status$/', $path, $matches) && $
     $matched_route = 'intern/activities.php';
 } elseif (preg_match('/^\/api\/intern\/activities\/(\d+)\/submit$/', $path, $matches) && $method === 'POST') {
     $matched_route = 'intern/activities.php';
+    $route_id = $matches[1];
+
+// --- Activity Instruction Files (Supervisor) ---
+} elseif (preg_match('/^\/api\/supervisor\/activities\/(\d+)\/files\/(\d+)$/', $path, $matches) && $method === 'DELETE') {
+    $matched_route = 'supervisor/activity_files.php';
+    $route_id = $matches[1];
+    $extra_id = $matches[2];
+} elseif (preg_match('/^\/api\/supervisor\/activities\/(\d+)\/files$/', $path, $matches) && $method === 'POST') {
+    $matched_route = 'supervisor/activity_files.php';
     $route_id = $matches[1];
 
 // --- File download (role-agnostic, authenticated) ---

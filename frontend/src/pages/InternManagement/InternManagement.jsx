@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { internsApi, documentsApi, timelogsApi } from '../../services/api';
-import { FaEye, FaTimes, FaSearch } from 'react-icons/fa';
+import { FaEye, FaTimes, FaSearch, FaFilePdf, FaFileCsv } from 'react-icons/fa';
+import { downloadTimelogsPDF, downloadTimelogsCSV } from '../../utils/exportTimelogs';
 import '../../styles/manage-page.css';
 
 const TAB_DETAILS = 'Details';
@@ -333,6 +334,16 @@ export default function InternManagement() {
               {/* --- TIME LOGS TAB --- */}
               {modalTab === TAB_TIMELOGS && (
                 <div>
+                  {!tlogLoading && timelogs.length > 0 && (
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--space-2)', marginBottom: 'var(--space-3)' }}>
+                      <button className="btn btn--ghost btn--sm" onClick={() => downloadTimelogsCSV(timelogs, `timelogs_${selectedIntern.first_name}_${selectedIntern.last_name}_${new Date().toISOString().slice(0,10)}.csv`)} title="Download CSV">
+                        <FaFileCsv /> CSV
+                      </button>
+                      <button className="btn btn--primary btn--sm" onClick={() => downloadTimelogsPDF(timelogs, { title: 'Time Logs Report', subtitle: `${selectedIntern.first_name} ${selectedIntern.last_name}` })} title="Download PDF">
+                        <FaFilePdf /> PDF
+                      </button>
+                    </div>
+                  )}
                   {tlogLoading && <div className="loading-state"><div className="spinner" /></div>}
                   {!tlogLoading && timelogs.length === 0 && (
                     <p style={{ textAlign: 'center', opacity: 0.6, padding: 'var(--space-8) 0' }}>No time logs found.</p>

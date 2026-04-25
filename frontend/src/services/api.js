@@ -307,6 +307,19 @@ export const activitiesApi = {
       body: formData, // FormData with 'files[]'
     }),
 
+  // Supervisor: upload instruction files (FormData with 'files[]')
+  uploadInstructionFiles: (activityId, formData) =>
+    request(`${API_BASE_URL}/supervisor/activities/${activityId}/files`, {
+      method: 'POST',
+      body: formData,
+    }),
+
+  // Supervisor: delete one instruction file
+  deleteInstructionFile: (activityId, fileId) =>
+    request(`${API_BASE_URL}/supervisor/activities/${activityId}/files/${fileId}`, {
+      method: 'DELETE',
+    }),
+
   // Shared — returns a fetch-ready URL with auth token
   downloadUrl: (fileId) =>
     `${API_BASE_URL}/files/${fileId}/download`,

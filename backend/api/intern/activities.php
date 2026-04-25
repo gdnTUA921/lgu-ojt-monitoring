@@ -15,7 +15,7 @@ const MAX_UPLOAD_BYTES = 52428800; // 50 MB (Total)
 const MAX_FILES = 10;
 
 try {
-    $stmt = $pdo->prepare("SELECT intern_id, supervisor_id FROM interns WHERE user_id = ?");
+    $stmt = $pdo->prepare("SELECT intern_id, supervisor_id, first_name, last_name FROM interns WHERE user_id = ?");
     $stmt->execute([$user_id]);
     $intern = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -26,6 +26,7 @@ try {
     }
     $intern_id     = $intern['intern_id'];
     $supervisor_id = $intern['supervisor_id'];
+    $intern_name   = trim($intern['first_name'] . ' ' . $intern['last_name']);
 
     // ── POST: submit multiple files ────────────────
     if ($method === 'POST' && $route_id) {
@@ -147,6 +148,24 @@ try {
                 "Intern submitted $file_count files for activity ID: $route_id.", $ip, $ua]);
 
         $pdo->commit();
+
+        // 4. Notify supervisor
+        if ($supervisor_id) {
+            $sup_uid_stmt = $pdo->prepare("SELECT user_id FROM supervisors WHERE supervisor_id = ?");
+            $sup_uid_stmt->execute([$supervisor_id]);
+            $sup_user_id = $sup_uid_stmt->fetchColumn();
+
+            if ($sup_user_id) {
+                $action_label = $existing ? 'resubmitted' : 'submitted';
+                $pdo->prepare("INSERT INTO notifications (user_id, title, message, type) VALUES (?, ?, ?, 'ACTIVITY')")
+                    ->execute([
+                        $sup_user_id,
+                        "New Submission: {$activity['title']}",
+                        "{$intern_name} {$action_label} their work for \"{$activity['title']}\"."
+                    ]);
+            }
+        }
+
         echo json_encode(["status" => "success", "submission_id" => (int)$submission_id]);
         exit;
     }
@@ -183,21 +202,19 @@ try {
                 ? strtotime($r['submitted_at']) > strtotime($r['due_date']) : false;
             $r['past_due'] = $r['due_date'] ? strtotime($r['due_date']) < $now : false;
 
-            // Fetch files if submitted
+            // Fetch intern submission files
             if ($r['submission_id']) {
-                $f_stmt = $pdo->prepare("SELECT file_id, file_name, file_size, mime_type, file_path FROM activity_submission_files WHERE submission_id = ?");
+                $f_stmt = $pdo->prepare("SELECT file_id, file_name, file_size, mime_type FROM activity_submission_files WHERE submission_id = ?");
                 $f_stmt->execute([$r['submission_id']]);
                 $r['files'] = $f_stmt->fetchAll(PDO::FETCH_ASSOC);
-                
-                // Legacy compatibility (if needed by frontend)
-                if (count($r['files']) > 0) {
-                    $r['file_name'] = $r['files'][0]['file_name'];
-                    $r['file_size'] = $r['files'][0]['file_size'];
-                    $r['mime_type'] = $r['files'][0]['mime_type'];
-                }
             } else {
                 $r['files'] = [];
             }
+
+            // Fetch supervisor instruction files
+            $if_stmt = $pdo->prepare("SELECT file_id, file_name, file_size, mime_type FROM activity_instruction_files WHERE activity_id = ? ORDER BY uploaded_at ASC");
+            $if_stmt->execute([$r['activity_id']]);
+            $r['instruction_files'] = $if_stmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
         echo json_encode(["status" => "success", "activities" => $rows]);

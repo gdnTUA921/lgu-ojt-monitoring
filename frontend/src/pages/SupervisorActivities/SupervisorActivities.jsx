@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { activitiesApi, internsApi } from '../../services/api';
-import { FaEye, FaEdit, FaPlus, FaTimes, FaDownload, FaToggleOn, FaToggleOff, FaFile } from 'react-icons/fa';
+import { FaEye, FaEdit, FaPlus, FaTimes, FaDownload, FaToggleOn, FaToggleOff, FaFile, FaUpload, FaTrash } from 'react-icons/fa';
 import '../../styles/manage-page.css';
+
+const MAX_INSTRUCTION_FILES = 5;
 
 const fmtDate = (v) => {
   if (!v) return '—';
@@ -24,14 +26,145 @@ const submissionChip = (row, isGraded) => {
   return <span className="chip chip--primary">Submitted</span>;
 };
 
+/* ── Live file panel for edit mode (files already exist on the server) ── */
+function InstructionFilesPanel({ activityId, files, onFilesChange }) {
+  const fileRef = useRef(null);
+  const [uploading, setUploading] = useState(false);
+  const [deleting, setDeleting] = useState(null);
+
+  const remaining = MAX_INSTRUCTION_FILES - files.length;
+
+  const handleAdd = async (e) => {
+    const selected = Array.from(e.target.files || []);
+    if (!selected.length) return;
+    if (selected.length > remaining) {
+      alert(`You can only add ${remaining} more file(s).`);
+      return;
+    }
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      selected.forEach(f => fd.append('files[]', f));
+      const res = await activitiesApi.uploadInstructionFiles(activityId, fd);
+      onFilesChange(res.files || []);
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = '';
+    }
+  };
+
+  const handleDelete = async (fileId) => {
+    if (!confirm('Remove this instruction file?')) return;
+    setDeleting(fileId);
+    try {
+      await activitiesApi.deleteInstructionFile(activityId, fileId);
+      onFilesChange(files.filter(f => f.file_id !== fileId));
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setDeleting(null);
+    }
+  };
+
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+        <div style={{ fontSize: 12, fontWeight: 600 }}>
+          Instruction Files <span style={{ opacity: 0.55, fontWeight: 400 }}>({files.length}/{MAX_INSTRUCTION_FILES})</span>
+        </div>
+        {remaining > 0 && (
+          <>
+            <button type="button" className="btn btn--ghost btn--sm" onClick={() => fileRef.current?.click()} disabled={uploading} style={{ fontSize: 12 }}>
+              {uploading ? 'Uploading…' : <><FaUpload style={{ marginRight: 4 }} />Add Files</>}
+            </button>
+            <input ref={fileRef} type="file" multiple style={{ display: 'none' }} onChange={handleAdd} />
+          </>
+        )}
+      </div>
+      {files.length === 0 && <div style={{ fontSize: 12, opacity: 0.5, padding: '8px 0' }}>No instruction files yet.</div>}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {files.map(f => (
+          <div key={f.file_id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px', background: 'var(--color-surface-container-high)', borderRadius: 6 }}>
+            <FaFile style={{ fontSize: 12, color: 'var(--color-primary)', flexShrink: 0 }} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 12, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.file_name}</div>
+              <div style={{ fontSize: 10, opacity: 0.55 }}>{fmtSize(f.file_size)}</div>
+            </div>
+            <button type="button" className="btn btn--sm btn--ghost" style={{ padding: '2px 6px', height: 'auto', color: 'var(--color-error)', flexShrink: 0 }} onClick={() => handleDelete(f.file_id)} disabled={deleting === f.file_id} title="Remove">
+              <FaTrash style={{ fontSize: 11 }} />
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── Staged file picker for create mode (files held locally until save) ── */
+function PendingFilePicker({ files, onChange }) {
+  const fileRef = useRef(null);
+  const remaining = MAX_INSTRUCTION_FILES - files.length;
+
+  const handlePick = (e) => {
+    const picked = Array.from(e.target.files || []);
+    if (!picked.length) return;
+    if (files.length + picked.length > MAX_INSTRUCTION_FILES) {
+      alert(`Maximum ${MAX_INSTRUCTION_FILES} instruction files allowed.`);
+      if (fileRef.current) fileRef.current.value = '';
+      return;
+    }
+    onChange([...files, ...picked]);
+    if (fileRef.current) fileRef.current.value = '';
+  };
+
+  const remove = (idx) => onChange(files.filter((_, i) => i !== idx));
+
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+        <div style={{ fontSize: 12, fontWeight: 600 }}>
+          Instruction Files <span style={{ opacity: 0.55, fontWeight: 400 }}>({files.length}/{MAX_INSTRUCTION_FILES}) — optional</span>
+        </div>
+        {remaining > 0 && (
+          <>
+            <button type="button" className="btn btn--ghost btn--sm" onClick={() => fileRef.current?.click()} style={{ fontSize: 12 }}>
+              <FaUpload style={{ marginRight: 4 }} />Add Files
+            </button>
+            <input ref={fileRef} type="file" multiple style={{ display: 'none' }} onChange={handlePick} />
+          </>
+        )}
+      </div>
+      {files.length === 0 && <div style={{ fontSize: 12, opacity: 0.5, padding: '8px 0' }}>No files selected yet.</div>}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {files.map((f, idx) => (
+          <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px', background: 'var(--color-surface-container-high)', borderRadius: 6 }}>
+            <FaFile style={{ fontSize: 12, color: 'var(--color-primary)', flexShrink: 0 }} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 12, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.name}</div>
+              <div style={{ fontSize: 10, opacity: 0.55 }}>{fmtSize(f.size)}</div>
+            </div>
+            <button type="button" className="btn btn--sm btn--ghost" style={{ padding: '2px 6px', height: 'auto', color: 'var(--color-error)', flexShrink: 0 }} onClick={() => remove(idx)} title="Remove">
+              <FaTrash style={{ fontSize: 11 }} />
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function SupervisorActivities() {
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [showForm, setShowForm] = useState(false);
-  const [editing, setEditing] = useState(null);
-  const [form, setForm] = useState({ title: '', description: '', has_due_date: false, due_date: '', is_graded: true, accept_late: false });
+  const [editing, setEditing] = useState(null); // null = create mode, object = edit mode
+  const [form, setForm] = useState({ title: '', description: '', has_due_date: false, due_date: '', is_graded: true, accept_late: false, target_type: 'all', intern_ids: [] });
   const [saving, setSaving] = useState(false);
+  const [instructionFiles, setInstructionFiles] = useState([]); // server files (edit mode)
+  const [pendingFiles, setPendingFiles] = useState([]);          // local File objects (create mode)
 
   const [viewActivity, setViewActivity] = useState(null);
   const [roster, setRoster] = useState([]);
@@ -43,8 +176,8 @@ export default function SupervisorActivities() {
 
   const [myInterns, setMyInterns] = useState([]);
 
-  useEffect(() => { 
-    fetchActivities(); 
+  useEffect(() => {
+    fetchActivities();
     fetchMyInterns();
   }, []);
 
@@ -71,12 +204,16 @@ export default function SupervisorActivities() {
 
   const openCreate = () => {
     setEditing(null);
+    setPendingFiles([]);
+    setInstructionFiles([]);
     setForm({ title: '', description: '', has_due_date: false, due_date: '', is_graded: true, accept_late: false, target_type: 'all', intern_ids: [] });
     setShowForm(true);
   };
 
   const openEdit = (a) => {
     setEditing(a);
+    setInstructionFiles(a.instruction_files || []);
+    setPendingFiles([]);
     setForm({
       title: a.title || '',
       description: a.description || '',
@@ -88,6 +225,14 @@ export default function SupervisorActivities() {
       intern_ids: a.intern_ids || []
     });
     setShowForm(true);
+  };
+
+  const closeForm = () => {
+    setShowForm(false);
+    setEditing(null);
+    setPendingFiles([]);
+    setInstructionFiles([]);
+    fetchActivities();
   };
 
   const handleSave = async () => {
@@ -103,10 +248,20 @@ export default function SupervisorActivities() {
         target_type: form.target_type,
         intern_ids: form.target_type === 'specific' ? form.intern_ids : []
       };
-      if (editing) await activitiesApi.update(editing.activity_id, payload);
-      else         await activitiesApi.create(payload);
-      setShowForm(false);
-      fetchActivities();
+
+      if (editing) {
+        await activitiesApi.update(editing.activity_id, payload);
+      } else {
+        const res = await activitiesApi.create(payload);
+        // Upload any staged instruction files now that we have an ID
+        if (pendingFiles.length > 0) {
+          const fd = new FormData();
+          pendingFiles.forEach(f => fd.append('files[]', f));
+          await activitiesApi.uploadInstructionFiles(res.activity_id, fd);
+        }
+      }
+
+      closeForm();
     } catch (err) {
       alert(err.message);
     } finally {
@@ -216,6 +371,11 @@ export default function SupervisorActivities() {
                       {a.description}
                     </div>
                   )}
+                  {a.instruction_files?.length > 0 && (
+                    <div style={{ fontSize: '11px', color: 'var(--color-primary)', marginTop: 2 }}>
+                      {a.instruction_files.length} instruction file{a.instruction_files.length !== 1 ? 's' : ''}
+                    </div>
+                  )}
                 </td>
                 <td>{fmtDate(a.due_date)}</td>
                 <td>{a.submission_count}/{a.total_interns}</td>
@@ -244,23 +404,24 @@ export default function SupervisorActivities() {
         </table>
       </div>
 
-      {/* Create/Edit Modal */}
+      {/* Create / Edit Modal */}
       {showForm && (
         <div className="modal-overlay" onClick={() => setShowForm(false)}>
           <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 560, width: '90vw' }}>
             <div className="modal__header">
               <h3 className="modal__title">{editing ? 'Edit Activity' : 'New Activity'}</h3>
-              <button className="btn btn--icon" onClick={() => setShowForm(false)}><FaTimes /></button>
+              <button className="btn btn--icon" onClick={closeForm}><FaTimes /></button>
             </div>
-            <div className="modal__body" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+            <div className="modal__body" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)', maxHeight: '70vh', overflowY: 'auto' }}>
               <label>
                 <div style={{ fontSize: '12px', fontWeight: 600, marginBottom: 4 }}>Title *</div>
                 <input className="input" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} />
               </label>
               <label>
                 <div style={{ fontSize: '12px', fontWeight: 600, marginBottom: 4 }}>Description</div>
-                <textarea className="input" rows={4} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
+                <textarea className="input" rows={3} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
               </label>
+
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}>
                   <div>
@@ -282,12 +443,13 @@ export default function SupervisorActivities() {
                   </>
                 )}
               </div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
+
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <input type="checkbox" checked={form.is_graded} onChange={e => setForm({ ...form, is_graded: e.target.checked })} />
                 <span>Will be graded</span>
               </label>
 
-              <div style={{ marginTop: 8 }}>
+              <div>
                 <div style={{ fontSize: '12px', fontWeight: 600, marginBottom: 8 }}>Target Interns</div>
                 <div style={{ display: 'flex', gap: 16, marginBottom: 12 }}>
                   <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
@@ -299,20 +461,19 @@ export default function SupervisorActivities() {
                     <span>Specific Interns</span>
                   </label>
                 </div>
-
                 {form.target_type === 'specific' && (
-                  <div style={{ border: '1px solid var(--color-outline-variant)', borderRadius: 8, padding: 12, maxHeight: 200, overflowY: 'auto', background: 'var(--color-surface-container-low)' }}>
+                  <div style={{ border: '1px solid var(--color-outline-variant)', borderRadius: 8, padding: 12, maxHeight: 160, overflowY: 'auto', background: 'var(--color-surface-container-low)' }}>
                     {myInterns.length === 0 ? (
                       <div style={{ fontSize: 13, opacity: 0.6, textAlign: 'center' }}>No interns found.</div>
                     ) : (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                         {myInterns.map(i => (
                           <label key={i.intern_id} style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
-                            <input 
-                              type="checkbox" 
+                            <input
+                              type="checkbox"
                               checked={form.intern_ids.includes(i.intern_id)}
                               onChange={(e) => {
-                                const ids = e.target.checked 
+                                const ids = e.target.checked
                                   ? [...form.intern_ids, i.intern_id]
                                   : form.intern_ids.filter(id => id !== i.intern_id);
                                 setForm({ ...form, intern_ids: ids });
@@ -329,9 +490,22 @@ export default function SupervisorActivities() {
                   </div>
                 )}
               </div>
+
+              {/* Instruction files */}
+              <div style={{ borderTop: '1px solid var(--color-outline-variant)', paddingTop: 'var(--space-3)' }}>
+                {editing ? (
+                  <InstructionFilesPanel
+                    activityId={editing.activity_id}
+                    files={instructionFiles}
+                    onFilesChange={setInstructionFiles}
+                  />
+                ) : (
+                  <PendingFilePicker files={pendingFiles} onChange={setPendingFiles} />
+                )}
+              </div>
             </div>
-            <div className="modal__footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: 'var(--space-4)' }}>
-              <button className="btn btn--ghost" onClick={() => setShowForm(false)} disabled={saving}>Cancel</button>
+            <div className="modal__footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+              <button className="btn btn--ghost" onClick={closeForm} disabled={saving}>Cancel</button>
               <button className="btn btn--primary" onClick={handleSave} disabled={saving}>
                 {saving ? 'Saving…' : (editing ? 'Save Changes' : 'Create')}
               </button>
@@ -360,6 +534,28 @@ export default function SupervisorActivities() {
                 </div>
               )}
 
+              {viewActivity.instruction_files?.length > 0 && (
+                <div style={{ marginBottom: 16, padding: '10px 14px', background: 'var(--color-surface-container-low)', borderRadius: 8, border: '1px solid var(--color-outline-variant)' }}>
+                  <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', opacity: 0.55, marginBottom: 8 }}>
+                    Instruction Files ({viewActivity.instruction_files.length})
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {viewActivity.instruction_files.map(f => (
+                      <div key={f.file_id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px', background: 'var(--color-surface-container-high)', borderRadius: 6, maxWidth: 260 }}>
+                        <FaFile style={{ fontSize: 12, color: 'var(--color-primary)', flexShrink: 0 }} />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: 12, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.file_name}</div>
+                          <div style={{ fontSize: 10, opacity: 0.55 }}>{fmtSize(f.file_size)}</div>
+                        </div>
+                        <button className="btn btn--sm btn--ghost" style={{ padding: '3px 6px', height: 'auto', flexShrink: 0 }} onClick={() => handleDownloadFile(f)}>
+                          <FaDownload style={{ fontSize: 11 }} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {rosterLoading && <div className="loading-state"><div className="spinner" /></div>}
 
               {!rosterLoading && roster.length === 0 && (
@@ -370,7 +566,6 @@ export default function SupervisorActivities() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   {roster.map(row => (
                     <div key={row.intern_id} style={{ border: '1px solid var(--color-outline-variant)', borderRadius: 10, padding: '14px 16px', background: 'var(--color-surface-container-low)' }}>
-                      {/* Top row: intern info + status + submitted date */}
                       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
                         <div>
                           <div style={{ fontWeight: 600, fontSize: 14 }}>{row.first_name} {row.last_name}</div>
@@ -384,7 +579,6 @@ export default function SupervisorActivities() {
                         </div>
                       </div>
 
-                      {/* Files */}
                       {row.submission_id && row.files?.length > 0 && (
                         <div style={{ marginTop: 12 }}>
                           <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', opacity: 0.55, marginBottom: 6 }}>
@@ -398,7 +592,7 @@ export default function SupervisorActivities() {
                                   <div style={{ fontSize: 12, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.file_name}</div>
                                   <div style={{ fontSize: 10, opacity: 0.55 }}>{fmtSize(f.file_size)}</div>
                                 </div>
-                                <button className="btn btn--sm btn--ghost" style={{ padding: '3px 6px', height: 'auto', flexShrink: 0 }} title="Download" onClick={() => handleDownloadFile(f)}>
+                                <button className="btn btn--sm btn--ghost" style={{ padding: '3px 6px', height: 'auto', flexShrink: 0 }} onClick={() => handleDownloadFile(f)}>
                                   <FaDownload style={{ fontSize: 11 }} />
                                 </button>
                               </div>
@@ -407,7 +601,6 @@ export default function SupervisorActivities() {
                         </div>
                       )}
 
-                      {/* Grade section */}
                       {viewActivity.is_graded && row.submission_id && (
                         <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--color-outline-variant)' }}>
                           {gradingId === row.submission_id ? (
