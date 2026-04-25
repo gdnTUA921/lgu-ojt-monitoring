@@ -1,0 +1,286 @@
+/* ============================================
+   Dashboard Layout — BEM
+   ============================================ */
+
+.dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.dashboard-layout__main {
+  flex: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  margin-left: 0;
+  transition: margin-left var(--transition-base);
+}
+
+.dashboard-layout--open .dashboard-layout__main {
+  margin-left: var(--sidebar-width);
+}
+
+@media (max-width: 1024px) {
+  .dashboard-layout--open .dashboard-layout__main {
+    margin-left: 0;
+  }
+}
+
+/* ── Top Header Bar ──────────────────────── */
+.dashboard-layout__header {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-8);
+  background: var(--color-surface-container-lowest);
+  border-bottom: 1px solid rgba(194, 198, 211, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+}
+
+.dashboard-layout__header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.dashboard-layout__page-title {
+  font-family: var(--font-headline);
+  font-size: var(--text-title-lg);
+  font-weight: var(--weight-bold);
+  color: var(--color-on-surface);
+}
+
+.dashboard-layout__breadcrumb {
+  font-size: var(--text-label-md);
+  color: var(--color-on-surface-variant);
+  font-weight: 500;
+}
+
+.dashboard-layout__menu-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+  color: var(--color-on-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.dashboard-layout__menu-btn:hover {
+  background: var(--color-surface-container-high);
+}
+
+.dashboard-layout__header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+/* ── Notif Bell ─────────────────────────── */
+.dashboard-layout__notif-btn {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  background: var(--color-surface-container);
+  transition: background var(--transition-fast);
+  cursor: pointer;
+  border: none;
+  color: var(--color-on-surface-variant);
+}
+
+.dashboard-layout__notif-btn:hover {
+  background: var(--color-surface-container-high);
+}
+
+.dashboard-layout__notif-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 10px;
+  background: var(--color-error);
+  color: #fff;
+  border: 2px solid var(--color-surface-container-lowest);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  transform: translate(25%, -25%);
+  pointer-events: none;
+}
+
+/* ── Profile Dropdown ───────────────────── */
+.dashboard-layout__profile-wrap {
+  position: relative;
+}
+
+.dashboard-layout__profile-trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  background: var(--color-surface-container);
+  border: 1px solid rgba(194, 198, 211, 0.1);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  color: var(--color-on-surface);
+}
+
+.dashboard-layout__profile-trigger:hover,
+.dashboard-layout__profile-trigger.active {
+  background: var(--color-surface-container-high);
+  border-color: var(--color-primary);
+}
+
+.dashboard-layout__avatar-sm {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  overflow: hidden;
+}
+
+.dashboard-layout__avatar-sm img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dashboard-layout__chevron {
+  font-size: 0.75rem;
+  opacity: 0.6;
+  transition: transform 0.2s ease;
+}
+
+.dashboard-layout__chevron.rotate {
+  transform: rotate(180deg);
+}
+
+/* ── Dropdown Menu ──────────────────────── */
+.dashboard-layout__dropdown {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  width: 200px;
+  background: var(--color-surface-container-lowest);
+  border: 1px solid rgba(194, 198, 211, 0.1);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  z-index: 1000;
+}
+
+.dashboard-layout__dropdown-header {
+  padding: var(--space-4) var(--space-4);
+  background: var(--color-surface-container);
+}
+
+.dashboard-layout__dropdown-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--color-on-surface);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dashboard-layout__dropdown-role {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-top: 2px;
+}
+
+.dashboard-layout__dropdown-divider {
+  height: 1px;
+  background: rgba(194, 198, 211, 0.1);
+}
+
+.dashboard-layout__dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-on-surface-variant);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+
+.dashboard-layout__dropdown-item:hover {
+  background: var(--color-surface-container-high);
+  color: var(--color-primary);
+}
+
+.dashboard-layout__dropdown-item--danger {
+  color: var(--color-error);
+}
+
+.dashboard-layout__dropdown-item--danger:hover {
+  background: rgba(211, 47, 47, 0.05);
+  color: var(--color-error);
+}
+
+/* ── Content Area ────────────────────────── */
+.dashboard-layout__content {
+  flex: 1;
+  padding: var(--space-8);
+  animation: fadeIn var(--transition-base) ease;
+}
+
+/* ── Responsive ──────────────────────────── */
+@media (max-width: 1024px) {
+  .dashboard-layout__main {
+    margin-left: 0;
+  }
+
+  .dashboard-layout__header {
+    padding: 0 var(--space-4);
+  }
+
+  .dashboard-layout__content {
+    padding: var(--space-4);
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboard-layout--open .dashboard-layout__header-left {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .dashboard-layout__content {
+    padding: var(--space-3);
+  }
+}

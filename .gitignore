@@ -1,0 +1,9 @@
+# Stitch and Agentic Tools
+.agents/
+.stitch/
+skills-lock.json
+
+# Dependencies and OS
+node_modules/
+.DS_Store
+.env

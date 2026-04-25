@@ -1,0 +1,16 @@
+# Dependency directories
+/vendor/
+
+# Configuration files
+.env
+
+# PHP related
+composer.phar
+*.log
+.phpunit.result.cache
+
+# MacOS folder attributes
+.DS_Store
+
+# Uploads directory (if dynamic)
+/uploads/

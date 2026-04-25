@@ -1,0 +1,181 @@
+/* ============================================
+   Intern Dashboard — Additional Styles
+   ============================================ */
+.intern-dashboard__progress {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  padding: var(--space-8);
+}
+
+.intern-dashboard__progress-ring {
+  flex-shrink: 0;
+}
+
+.intern-dashboard__progress-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  font-size: var(--text-body-lg);
+}
+
+/* ── Tertiary stat card ── */
+.admin-dashboard__stat-card--tertiary::after {
+  background: linear-gradient(90deg, var(--color-tertiary), var(--color-tertiary-container));
+}
+
+.admin-dashboard__stat-card--tertiary .admin-dashboard__stat-icon--tertiary {
+  background: var(--color-tertiary-fixed);
+  color: var(--color-on-tertiary-fixed);
+}
+
+/* ── Timelog Modal ── */
+.intern-dashboard__modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+.intern-dashboard__modal {
+  background: var(--color-surface-container-lowest);
+  border-radius: var(--radius-2xl);
+  width: min(560px, 90vw);
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-xl);
+  animation: slideUp 0.3s ease;
+}
+
+.intern-dashboard__modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-6) var(--space-6) var(--space-4);
+  border-bottom: 1px solid var(--color-outline-variant);
+}
+
+.intern-dashboard__modal-header h3 {
+  font-family: var(--font-headline);
+  font-size: var(--text-title-lg);
+  font-weight: var(--weight-bold);
+  margin: 0;
+}
+
+.intern-dashboard__modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--color-on-surface-variant);
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  transition: background var(--transition-fast);
+}
+
+.intern-dashboard__modal-close:hover {
+  background: var(--color-surface-container-high);
+}
+
+.intern-dashboard__modal-body {
+  padding: var(--space-6);
+}
+
+.intern-dashboard__modal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+.intern-dashboard__modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.intern-dashboard__modal-label {
+  font-size: var(--text-label-sm);
+  color: var(--color-on-surface-variant);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: var(--weight-semibold);
+}
+
+.intern-dashboard__modal-value {
+  font-size: var(--text-body-lg);
+  color: var(--color-on-surface);
+  font-weight: var(--weight-medium);
+}
+
+.intern-dashboard__modal-section {
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-outline-variant);
+}
+
+.intern-dashboard__modal-section h4 {
+  font-size: var(--text-body-lg);
+  font-weight: var(--weight-semibold);
+  margin: 0 0 var(--space-3);
+  color: var(--color-on-surface);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.intern-dashboard__map-pin-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.intern-dashboard__map-pin-icon::before {
+  content: '📍';
+  font-size: 1.1rem;
+}
+
+.intern-dashboard__modal-coords {
+  display: flex;
+  gap: var(--space-4);
+  font-size: var(--text-body-sm);
+  color: var(--color-on-surface-variant);
+  margin-bottom: var(--space-4);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 640px) {
+  .intern-dashboard__progress {
+    flex-direction: column;
+    text-align: center;
+  }
+}

@@ -1,0 +1,158 @@
+/* ============================================
+   LGU OJT Monitoring System — Design Tokens
+   "The Architectural Ledger" — Mandaluyong Blue/Yellow
+   ============================================ */
+
+:root {
+  /* ── Primary (Command) ────────────────────── */
+  --color-primary: #003B72;
+  --color-primary-container: #00529B;
+  --color-primary-fixed: #D5E3FF;
+  --color-primary-fixed-dim: #A6C8FF;
+  --color-on-primary: #FFFFFF;
+  --color-on-primary-container: #A5C7FF;
+  --color-on-primary-fixed: #001C3B;
+  --color-on-primary-fixed-variant: #004787;
+  --color-inverse-primary: #A6C8FF;
+
+  /* ── Secondary (Illumination — Gold/Yellow) ── */
+  --color-secondary: #705D00;
+  --color-secondary-container: #FCD400;
+  --color-secondary-fixed: #FFE16D;
+  --color-secondary-fixed-dim: #E9C400;
+  --color-on-secondary: #FFFFFF;
+  --color-on-secondary-container: #6E5C00;
+  --color-on-secondary-fixed: #221B00;
+  --color-on-secondary-fixed-variant: #544600;
+
+  /* ── Tertiary ─────────────────────────────── */
+  --color-tertiary: #163C65;
+  --color-tertiary-container: #31537E;
+  --color-tertiary-fixed: #D4E3FF;
+  --color-tertiary-fixed-dim: #A7C8FA;
+  --color-on-tertiary: #FFFFFF;
+  --color-on-tertiary-container: #A6C7F9;
+  --color-on-tertiary-fixed: #001C39;
+  --color-on-tertiary-fixed-variant: #254872;
+
+  /* ── Surfaces (Tonal Layering) ────────────── */
+  --color-surface: #F9F9FD;
+  --color-surface-dim: #D9DADD;
+  --color-surface-bright: #F9F9FD;
+  --color-surface-container: #EDEEF1;
+  --color-surface-container-low: #F3F3F7;
+  --color-surface-container-lowest: #FFFFFF;
+  --color-surface-container-high: #E7E8EB;
+  --color-surface-container-highest: #E2E2E6;
+  --color-surface-tint: #1D5FA8;
+  --color-surface-variant: #E2E2E6;
+  --color-on-surface: #191C1E;
+  --color-on-surface-variant: #424751;
+  --color-inverse-surface: #2E3133;
+  --color-inverse-on-surface: #F0F0F4;
+
+  /* ── Error / Danger ───────────────────────── */
+  --color-error: #BA1A1A;
+  --color-error-container: #FFDAD6;
+  --color-on-error: #FFFFFF;
+  --color-on-error-container: #93000A;
+
+  /* ── Outline ──────────────────────────────── */
+  --color-outline: #727782;
+  --color-outline-variant: #C2C6D3;
+
+  /* ── Status Chip Colors ───────────────────── */
+  --color-success: #1B6D2E;
+  --color-success-container: #A8F5AD;
+  --color-warning: #705D00;
+  --color-warning-container: #FFE16D;
+  --color-info: #00529B;
+  --color-info-container: #D5E3FF;
+
+  /* ── Typography ───────────────────────────── */
+  --font-headline: 'Public Sans', system-ui, -apple-system, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-label: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Display */
+  --text-display-lg: 3.5rem;
+  --text-display-md: 2.75rem;
+  --text-display-sm: 2.25rem;
+
+  /* Headline */
+  --text-headline-lg: 2rem;
+  --text-headline-md: 1.75rem;
+  --text-headline-sm: 1.5rem;
+
+  /* Title */
+  --text-title-lg: 1.375rem;
+  --text-title-md: 1.125rem;
+  --text-title-sm: 1rem;
+
+  /* Body */
+  --text-body-lg: 1rem;
+  --text-body-md: 0.875rem;
+  --text-body-sm: 0.8125rem;
+
+  /* Label */
+  --text-label-lg: 0.875rem;
+  --text-label-md: 0.75rem;
+  --text-label-sm: 0.6875rem;
+
+  /* Font Weights */
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* ── Spacing Scale (×2 base) ──────────────── */
+  --space-1: 0.25rem;   /* 4px */
+  --space-2: 0.5rem;    /* 8px */
+  --space-3: 0.75rem;   /* 12px */
+  --space-4: 1rem;      /* 16px */
+  --space-5: 1.25rem;   /* 20px */
+  --space-6: 1.5rem;    /* 24px */
+  --space-8: 2rem;      /* 32px */
+  --space-10: 2.5rem;   /* 40px */
+  --space-12: 3rem;     /* 48px */
+  --space-16: 4rem;     /* 64px */
+  --space-20: 5rem;     /* 80px */
+  --space-24: 6rem;     /* 96px */
+
+  /* ── Border Radius ────────────────────────── */
+  --radius-none: 0;
+  --radius-sm: 0.25rem;  /* 4px — ROUND_FOUR */
+  --radius-md: 0.5rem;   /* 8px */
+  --radius-lg: 0.75rem;  /* 12px */
+  --radius-xl: 1rem;     /* 16px */
+  --radius-2xl: 1.5rem;  /* 24px */
+  --radius-full: 9999px; /* pill */
+
+  /* ── Elevation (Tonal — No Heavy Shadows) ─── */
+  --shadow-ambient: 0px 20px 40px rgba(25, 28, 30, 0.06);
+  --shadow-sm: 0px 1px 3px rgba(25, 28, 30, 0.08);
+  --shadow-md: 0px 4px 12px rgba(25, 28, 30, 0.08);
+  --shadow-lg: 0px 8px 24px rgba(25, 28, 30, 0.1);
+
+  /* ── Transitions ──────────────────────────── */
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+  --transition-slow: 400ms ease;
+
+  /* ── Sidebar ──────────────────────────────── */
+  --sidebar-width: 260px;
+  --sidebar-collapsed: 72px;
+  --header-height: 64px;
+
+  /* ── Z-Index ──────────────────────────────── */
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-overlay: 300;
+  --z-modal: 400;
+  --z-toast: 500;
+}
+
+/* ── Ghost Border Utility ───────────────────── */
+.ghost-border {
+  border: 1px solid rgba(194, 198, 211, 0.15);
+}
